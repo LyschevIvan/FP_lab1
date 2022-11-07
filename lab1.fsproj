@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Program.fs" />
+    <Content Include="README.md" />
+    <Content Include=".gitlab-ci.yml" />
+    <Content Include="pics\Euler11.png" />
+    <Content Include="Task11.java" />
+    <Content Include="Task20.java" />
+  </ItemGroup>
+
+</Project>
