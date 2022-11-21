@@ -20,9 +20,17 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
+    - name: Setup linter  
+      run: dotnet tool install -g dotnet-fsharplint
+    - name: Setup formatter
+      run: dotnet tool install -g fantomas
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
+    - name: Lint 
+      run: dotnet fsharplint lint Program.fs
+    - name: Format 
+      run: fantomas Program.fs
     - name: Test
       run: dotnet test --no-build --verbosity normal
