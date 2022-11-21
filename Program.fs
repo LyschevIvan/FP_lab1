@@ -1,99 +1,221 @@
-﻿module lab1
+﻿module Lab1
+
 open System
-let n = 4
+open Microsoft.FSharp.Collections
+
+let N = 4
 let a = 20
 let b = 20
 
-let initData : int[,] =
-    let data = array2D [[08; 2; 22; 97; 38; 15; 0; 40; 0; 75; 4; 5; 7; 78; 52; 12; 50; 77; 91; 8];
-                [49; 49; 99; 40; 17; 81; 18; 57; 60; 87; 17; 40; 98; 43; 69; 48; 4; 56; 62; 0];
-                [81; 49; 31; 73; 55; 79; 14; 29; 93; 71; 40; 67; 53; 88; 30; 3; 49; 13; 36; 65];
-                [52; 70; 95; 23; 4; 60; 11; 42; 69; 24; 68; 56; 1; 32; 56; 71; 37; 2; 36; 91];
-                [22; 31; 16; 71; 51; 67; 63; 89; 41; 92; 36; 54; 22; 40; 40; 28; 66; 33; 13; 80];
-                [24; 47; 32; 60; 99; 3; 45; 2; 44; 75; 33; 53; 78; 36; 84; 20; 35; 17; 12; 50];
-                [32; 98; 81; 28; 64; 23; 67; 10; 26; 38; 40; 67; 59; 54; 70; 66; 18; 38; 64; 70];
-                [67; 26; 20; 68; 2; 62; 12; 20; 95; 63; 94; 39; 63; 8; 40; 91; 66; 49; 94; 21];
-                [24; 55; 58; 5; 66; 73; 99; 26; 97; 17; 78; 78; 96; 83; 14; 88; 34; 89; 63; 72];
-                [21; 36; 23; 9; 75; 0; 76; 44; 20; 45; 35; 14; 0; 61; 33; 97; 34; 31; 33; 95];
-                [78; 17; 53; 28; 22; 75; 31; 67; 15; 94; 3; 80; 4; 62; 16; 14; 9; 53; 56; 92];
-                [16; 39; 5; 42; 96; 35; 31; 47; 55; 58; 88; 24; 0; 17; 54; 24; 36; 29; 85; 57];
-                [86; 56; 0; 48; 35; 71; 89; 7; 5; 44; 44; 37; 44; 60; 21; 58; 51; 54; 17; 58];
-                [19; 80; 81; 68; 5; 94; 47; 69; 28; 73; 92; 13; 86; 52; 17; 77; 4; 89; 55; 40];
-                [4; 52; 8; 83; 97; 35; 99; 16; 7; 97; 57; 32; 16; 26; 26; 79; 33; 27; 98; 66];
-                [88; 36; 68; 87; 57; 62; 20; 72; 3; 46; 33; 67; 46; 55; 12; 32; 63; 93; 53; 69];
-                [4; 42; 16; 73; 38; 25; 39; 11; 24; 94; 72; 18; 8; 46; 29; 32; 40; 62; 76; 36];
-                [20; 69; 36; 41; 72; 30; 23; 88; 34; 62; 99; 69; 82; 67; 59; 85; 74; 4; 36; 16];
-                [20; 73; 35; 29; 78; 31; 90; 1; 74; 31; 49; 71; 48; 86; 81; 16; 23; 57; 5; 54];
-                [1; 70; 54; 71; 83; 51; 54; 69; 16; 92; 33; 48; 61; 43; 52; 1; 89; 19; 67; 48]]
+let initData path : int[,] =
+    let f (text: string) =
+        let arr =
+            text.Split([| '\n' |], StringSplitOptions.RemoveEmptyEntries)
+            |> Array.map (fun l -> l.Split([| ' ' |], StringSplitOptions.RemoveEmptyEntries))
+            |> array2D
+            |> Array2D.map (int)
+
+        arr
+
+    let data = IO.File.ReadAllText(__SOURCE_DIRECTORY__ + @"/" + path) |> f
     data
 
-let way inc_x inc_y = 
-    let next (data:int[,]) (x:int) (y:int)  =
-        let mutable incX : int = 0
-        let mutable incY : int = 0
-        let func() : int  = 
-            let v = data.[y+incY, x+incX]
-            incX <- (incX + inc_x)
-            incY <- (incY + inc_y)
-            v
-        func
-    next
 
-let getMult (data:int[,]) nextFunc (x:int) (y:int)  : int =
-    let mutable mult : int = 1;
-    let next = nextFunc data x y 
-    for i = 0 to n-1 do
-        let v = next()
-        mult <- mult * v
-    mult
+let way x =
+    if x = 0 then (0, 1)
+    elif x = 1 then (1, 0)
+    elif x = 2 then (1, 1)
+    else (-1, 1)
 
-let getMax (data:int[,]) (x_0, y_0) (x_n, y_n)  wayFunc =
-    let indexes = Array2D.init (x_n-x_0) (y_n-y_0) (fun x y -> (x+x_0,y+y_0))
-    let resArr = indexes |> Array2D.map (fun (x,y) -> getMult data wayFunc x y)
-    let maxV = [for i in 0 .. (resArr.GetLength(0) - 1) -> resArr.[i, *]] |> List.map (fun v -> Array.max v) |> List.max
+let getMult (data: int[,]) way x y =
+    let incX, incY = way
+
+    let rec innerMult mult xI yI n =
+        if n <= 0 then
+            mult
+        else
+            innerMult (mult * data[yI, xI]) (xI + incX) (yI + incY) (n - 1)
+
+    innerMult 1 x y N
+
+let getMax (data: int[,]) (x0, y0) (xN, yN) wayFunc =
+    let indexes = Array2D.init (xN - x0) (yN - y0) (fun x y -> (x + x0, y + y0))
+    let resArr = indexes |> Array2D.map (fun (x, y) -> getMult data wayFunc x y)
+
+    let maxV =
+        [ for i in 0 .. (resArr.GetLength(0) - 1) -> resArr.[i, *] ]
+        |> List.map (Array.max)
+        |> List.max
+
     maxV
-            
+
 let getMaxPerWay data wayNum =
-    let maxFunc = getMax data 
-    let mutable ret = 0
+    let maxFunc = getMax data
+
     if wayNum = 0 then
-        ret <- maxFunc (0, 0) (a, b-n+1) (way 0 1)
+        maxFunc (0, 0) (a, b - N + 1) (way wayNum)
     elif wayNum = 1 then
-        ret <- maxFunc (0, 0) (a-n+1, b) (way 1 0)
+        maxFunc (0, 0) (a - N + 1, b) (way wayNum)
     elif wayNum = 2 then
-        ret <- maxFunc (0, 0) (a-n+1, b-n+1) (way 1 1)
+        maxFunc (0, 0) (a - N + 1, b - N + 1) (way wayNum)
     else
-        ret <- maxFunc (n-1, 0) (a, b-n+1) (way -1 1)
-    ret
+        maxFunc (N - 1, 0) (a, b - N + 1) (way wayNum)
+
+let getMaxRec data =
+    let getMultiplied (data: int[,]) way (x, y) n =
+        let incX, incY = way
+
+        if
+            (a - (x + n * incX) < 0 || b - (y + n * incY) < 0)
+            || (x + n * incX < 0 || y + n * incY < 0)
+        then
+            0
+        else
+            let rec innerMultiplier xI yI nI =
+                if nI <= 0 then
+                    1
+                else
+                    data[yI, xI] * innerMultiplier (xI + incX) (yI + incY) (nI - 1)
+
+            let res = innerMultiplier x y n
+            res
+
+    let getMaxForWay data way =
+        let rec iterY data yI =
+            let rec iterX data way yI xI =
+                if xI >= a - 1 then
+                    0
+                else
+                    let mult = getMultiplied data way (xI, yI) N
+                    let max = iterX data way yI (xI + 1)
+                    if (mult > max) then mult else max
+
+            if yI >= b - 1 then
+                0
+            else
+                let thisRowMax = iterX data way yI 0
+                let rowMax = iterY data (yI + 1)
+                if rowMax > thisRowMax then rowMax else thisRowMax
+
+        iterY data 0
+
+    let rec findMaxThroughWays n =
+        if n < 0 then
+            0
+        else
+            let thisMax = getMaxForWay data (way n)
+            let max = findMaxThroughWays (n - 1)
+            if max > thisMax then max else thisMax
+
+    findMaxThroughWays 3
+
+let getMaxTailRec data =
+    let getMultiplied (data: int[,]) way (x, y) n =
+        let incX, incY = way
+
+        if
+            (a - (x + n * incX) < 0 || b - (y + n * incY) < 0)
+            || (x + n * incX < 0 || y + n * incY < 0)
+        then
+            0
+        else
+            let rec innerMultiplier res xI yI nI =
+                if nI <= 0 then
+                    res
+                else
+                    innerMultiplier (data[yI, xI] * res) (xI + incX) (yI + incY) (nI - 1)
+
+            let res = innerMultiplier 1 x y n
+            res
+
+    let getMaxForWay data way =
+        let rec iterY data max yI =
+            let rec iterX data way max yI xI =
+                if xI >= a - 1 then
+                    max
+                else
+                    let mult = getMultiplied data way (xI, yI) N
+
+                    if (mult > max) then
+                        iterX data way mult yI (xI + 1)
+                    else
+                        iterX data way max yI (xI + 1)
+
+            if yI >= b - 1 then
+                max
+            else
+                let thisRowMax = iterX data way 0 yI 0
+
+                if thisRowMax > max then
+                    iterY data thisRowMax (yI + 1)
+                else
+                    iterY data max (yI + 1)
+
+        iterY data 0 0
+
+    let rec findMaxThroughWays n max =
+        if n < 0 then
+            max
+        else
+            let thisMax = getMaxForWay data (way n)
+
+            if thisMax > max then
+                findMaxThroughWays (n - 1) thisMax
+            else
+                findMaxThroughWays (n - 1) max
+
+    findMaxThroughWays 3 0
 
 [<EntryPoint>]
-let main argv =
+let main argv : int =
 
     printfn "Project Euler 11"
-    // let rnd = new Random()
     //let data = Array2D.init a b (fun x y -> rnd.Next(1,100)) // for random 2D array
-    let data = initData
-    // printfn "%A" data
-    [for i in 0..3 -> getMaxPerWay data i] |> List.max |> printfn "%d"
-  
+    let data = initData "Euler11_input.txt"
+
+    let maxValueRec = getMaxRec data
+    let maxValueTailRec = getMaxTailRec data
+
+    let maxValueModule =
+        [| 0..3 |]
+        |> Array.map (getMaxPerWay data)
+        |> Array.fold (fun max i -> if max > i then max else i) 0
+
+    printfn $"Max value module impl. = {maxValueModule}"
+    printfn $"Max value recursion impl. = {maxValueRec}"
+    printfn $"Max value tail recursion impl = {maxValueTailRec}"
+
+
+
+
     printfn "Project Euler 20"
     let multiply x y = x * y
-    let factorial n : bigint = List.fold multiply 1I [1I .. n]
-    let value = factorial 100I |> sprintf "%A" |> Seq.map (fun v -> int( string( v))) |> Seq.fold (fun sum v -> sum + v) 0
-    printfn $"{value}"
-    
-    let mutable fact = factorial 100I
-    let mutable sum = 0I
-    while fact > 0I do
-        sum <- sum + fact%10I
-        fact <- fact / 10I
-    printfn $"{sum}"
-    
+    let factorial n : bigint = List.fold multiply 1I [ 1I .. n ]
+
+    let valueModule = factorial 100I |> sprintf "%A" |> Seq.sumBy (string >> int)
+
+    printfn $"Max value module impl. = {valueModule}"
+
     let rec symbSum (x: bigint) : bigint =
-        let mutable sum = x % 10I
+        let sum = x % 10I
+
         if x > 0I then
-            sum <- sum + symbSum (x/10I)
-        sum
-    let sum100 = symbSum (factorial 100I)
-    printfn $"{sum100}"
+            sum + (symbSum (x / 10I)) // обычная рекурсия
+        else
+            sum
+
+    let valueRec = symbSum (factorial 100I)
+    printfn $"Max value recursion impl. = {valueRec}"
+
+    let getSymbSumTail (x: bigint) =
+        let rec symbSumTailInner (x: bigint) sum : bigint =
+            if x > 0I then
+                symbSumTailInner (x / 10I) (sum + x % 10I) // хвостовая рекурсия
+            else
+                sum
+
+        symbSumTailInner x 0I
+
+    let valueRecTail = getSymbSumTail (factorial 100I)
+    printfn $"Max value tail recursion impl = {valueRecTail}"
     0

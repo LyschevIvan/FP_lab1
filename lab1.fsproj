@@ -12,6 +12,11 @@
     <Content Include="pics\Euler11.png" />
     <Content Include="Task11.java" />
     <Content Include="Task20.java" />
+    <Content Include="Euler11_input.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharpLint.Core" Version="0.21.3" />
   </ItemGroup>
 
 </Project>
