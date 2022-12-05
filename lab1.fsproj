@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,17 +6,40 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Lab1.fs" />
+    <Compile Include="Tests.fs" />
     <Compile Include="Program.fs" />
     <Content Include="README.md" />
     <Content Include=".gitlab-ci.yml" />
     <Content Include="pics\Euler11.png" />
     <Content Include="Task11.java" />
     <Content Include="Task20.java" />
-    <Content Include="Euler11_input.txt" />
+    <Content Include="inputData\Euler11_input.txt" />
+    <Content Include="inputData\Euler11_test_1.txt" />
+    <Content Include="inputData\Euler11_test_5.txt" />
+    <Content Include="inputData\Euler11_test_4.txt" />
+    <Content Include="inputData\Euler11_test_3.txt" />
+    <Content Include="inputData\Euler11_test_2.txt" />
+
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="dotnet-fslint" Version="0.10.0" />
     <PackageReference Include="FSharpLint.Core" Version="0.21.3" />
   </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+        <PackageReference Include="xunit" Version="2.4.1" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="coverlet.collector" Version="3.1.2">
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+    </ItemGroup>
+
 
 </Project>
