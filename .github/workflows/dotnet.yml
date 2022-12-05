@@ -29,7 +29,9 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Lint 
-      run: dotnet fsharplint lint Program.fs Tests.fs Lab1.fs
+      run: dotnet fsharplint lint Program.fs
+           dotnet fsharplint lint Tests.fs
+           dotnet fsharplint lint Lab1.fs
     - name: Format 
       run: fantomas Program.fs
     - name: Test
